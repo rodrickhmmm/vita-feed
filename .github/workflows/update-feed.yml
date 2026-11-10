@@ -1,0 +1,110 @@
+name: Update Vita feed
+
+on:
+  schedule:
+    - cron: "*/20 * * * *"
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/update-feed.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-feed
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Fetch posts from Reddit
+        run: |
+          node - <<'EOF'
+          const fs = require("fs");
+          const SUBS = ["VitaPiracy", "vitahacks", "PSVitaHomebrew"];
+          const UA = "Mozilla/5.0 (compatible; vita-feed-updater/1.0)";
+          let old = { posts: [] };
+          try { old = JSON.parse(fs.readFileSync("posts.json", "utf8")); } catch (e) {}
+
+          const decode = t => t.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"')
+            .replace(/&#39;|&#x27;/g, "'").replace(/&amp;/g, "&");
+
+          function fromJson(j, sub) {
+            return j.data.children.map(c => c.data).filter(d => !d.stickied).map(d => ({
+              id: d.id, sub, title: d.title, flair: d.link_flair_text || null, score: d.score,
+              comments: d.num_comments, created: d.created_utc, author: d.author,
+              permalink: "https://www.reddit.com" + d.permalink,
+              link: d.is_self ? null : d.url, domain: d.domain,
+              thumb: /^https?:/.test(d.thumbnail || "") ? d.thumbnail : null
+            }));
+          }
+
+          function fromAtom(xml, sub) {
+            return xml.split("<entry>").slice(1).map(e => {
+              const g = re => (e.match(re) || [])[1] || "";
+              const link = g(/<link[^>]*href="([^"]+)"/);
+              return {
+                id: g(/<id>([^<]+)<\/id>/).replace(/^t3_/, ""), sub,
+                title: decode(g(/<title[^>]*>([\s\S]*?)<\/title>/)), flair: null,
+                score: null, comments: null,
+                created: Date.parse(g(/<updated>([^<]+)<\/updated>/)) / 1000,
+                author: g(/<author>\s*<name>\/?(?:u\/)?([^<]*)<\/name>/),
+                permalink: decode(link), link: null, domain: "reddit.com",
+                thumb: decode(g(/<media:thumbnail[^>]*url="([^"]+)"/)) || null
+              };
+            }).filter(p => p.title);
+          }
+
+          async function get(url) {
+            const r = await fetch(url, { headers: { "User-Agent": UA, "Accept": "application/json, application/atom+xml, */*" } });
+            if (!r.ok) throw new Error("HTTP " + r.status);
+            return r;
+          }
+
+          async function fetchSub(sub) {
+            const tries = [
+              async () => fromJson(await (await get(`https://www.reddit.com/r/${sub}/new.json?limit=50&raw_json=1`)).json(), sub),
+              async () => fromJson(await (await get(`https://old.reddit.com/r/${sub}/new.json?limit=50&raw_json=1`)).json(), sub),
+              async () => fromAtom(await (await get(`https://www.reddit.com/r/${sub}/new/.rss?limit=50`)).text(), sub),
+              async () => fromAtom(await (await get(`https://old.reddit.com/r/${sub}/new/.rss?limit=50`)).text(), sub)
+            ];
+            let last;
+            for (const t of tries) {
+              try { const p = await t(); if (p.length) return p; } catch (e) { last = e; }
+            }
+            throw last || new Error("no posts");
+          }
+
+          (async () => {
+            let all = [];
+            for (const sub of SUBS) {
+              try {
+                const p = await fetchSub(sub);
+                console.log(`r/${sub}: ${p.length} posts`);
+                all.push(...p);
+              } catch (e) {
+                console.log(`r/${sub}: failed (${e.message}), keeping previous posts`);
+                all.push(...old.posts.filter(p => p.sub === sub));
+              }
+            }
+            all.sort((a, b) => b.created - a.created);
+            if (JSON.stringify(all) === JSON.stringify(old.posts)) { console.log("No changes"); return; }
+            fs.writeFileSync("posts.json", JSON.stringify({ updated: Date.now(), posts: all }));
+            console.log("posts.json written:", all.length);
+          })();
+          EOF
+
+      - name: Save posts.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add posts.json
+          git diff --cached --quiet || (git commit -m "Update feed" && git push)
