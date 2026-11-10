@@ -36,6 +36,7 @@ jobs:
 
           const decode = t => t.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"')
             .replace(/&#39;|&#x27;/g, "'").replace(/&amp;/g, "&");
+          const sleep = ms => new Promise(r => setTimeout(r, ms));
 
           function fromJson(j, sub) {
             return j.data.children.map(c => c.data).filter(d => !d.stickied).map(d => ({
@@ -64,9 +65,20 @@ jobs:
           }
 
           async function get(url) {
-            const r = await fetch(url, { headers: { "User-Agent": UA, "Accept": "application/json, application/atom+xml, */*" } });
-            if (!r.ok) throw new Error("HTTP " + r.status);
-            return r;
+            const waits = [0, 1500, 4000, 8000];
+            let last;
+            for (const w of waits) {
+              if (w) await sleep(w);
+              try {
+                const r = await fetch(url, { headers: { "User-Agent": UA, "Accept": "application/json, application/atom+xml, */*" } });
+                if (r.status === 429) throw new Error("HTTP 429");
+                if (!r.ok) throw new Error("HTTP " + r.status);
+                return r;
+              } catch (e) {
+                last = e;
+              }
+            }
+            throw last || new Error("request failed");
           }
 
           async function fetchSub(sub) {
@@ -79,6 +91,7 @@ jobs:
             let last;
             for (const t of tries) {
               try { const p = await t(); if (p.length) return p; } catch (e) { last = e; }
+              await sleep(1200);
             }
             throw last || new Error("no posts");
           }
@@ -97,6 +110,7 @@ jobs:
               } catch (e) {
                 last = e;
               }
+              await sleep(1200);
             }
             throw last || new Error("no combined posts");
           }

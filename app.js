@@ -52,20 +52,26 @@ function proxyRoutes(){
 }
 async function getJSON(url){
   const routes = proxyRoutes();
+  const waits = [0, 1400, 3600, 7000];
+  let last;
   routes.sort((a, b) => (b[0] === state.route) - (a[0] === state.route));
-  for(const [name, build] of routes){
-    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 9000);
-    try{
-      const r = await fetch(build(url), {signal: ctl.signal});
-      if(!r.ok) throw new Error("HTTP " + r.status);
-      const j = JSON.parse(await r.text());
-      if(!j.data || !j.data.children) throw new Error("bad data");
-      state.route = name;
-      return j;
-    }catch(e){ /* try the next route */ }
-    finally{ clearTimeout(t); }
+  for(const waitMs of waits){
+    if(waitMs) await sleep(waitMs);
+    for(const [name, build] of routes){
+      const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 9000);
+      try{
+        const r = await fetch(build(url), {signal: ctl.signal});
+        if(r.status === 429) throw new Error("HTTP 429");
+        if(!r.ok) throw new Error("HTTP " + r.status);
+        const j = JSON.parse(await r.text());
+        if(!j.data || !j.data.children) throw new Error("bad data");
+        state.route = name;
+        return j;
+      }catch(e){ last = e; /* try next route / next wait */ }
+      finally{ clearTimeout(t); }
+    }
   }
-  throw new Error("all routes failed");
+  throw last || new Error("all routes failed");
 }
 const REDDIT = sub => `https://www.reddit.com/r/${sub}/new.json?limit=50&raw_json=1`;
 const REDDIT_MULTI = `https://www.reddit.com/r/${SUBS.join("+")}/new.json?limit=150&raw_json=1`;
@@ -98,10 +104,70 @@ function parseListing(j, fallbackSub){
     .filter(d => !d.stickied)
     .map(d => mapPost(d, d.subreddit || fallbackSub));
 }
+function decodeHtml(s){
+  const t = document.createElement("textarea");
+  t.innerHTML = s || "";
+  return t.value;
+}
+function parseAtomListing(xml, sub){
+  const doc = new DOMParser().parseFromString(xml, "application/xml");
+  const entries = [...doc.querySelectorAll("entry")];
+  return entries.map(e => {
+    const txt = q => (e.querySelector(q)?.textContent || "").trim();
+    const link = e.querySelector("link")?.getAttribute("href") || "";
+    const id = txt("id").replace(/^.*t3_/, "");
+    const created = Date.parse(txt("updated") || txt("published")) / 1000;
+    const author = txt("author > name").replace(/^\/?u\//i, "");
+    const thumb = e.querySelector("media\\:thumbnail, thumbnail")?.getAttribute("url") || null;
+    return {
+      id,
+      sub,
+      title: decodeHtml(txt("title")),
+      flair: null,
+      score: null,
+      comments: null,
+      created: Number.isFinite(created) ? created : Math.floor(Date.now()/1000),
+      author,
+      permalink: link,
+      link: null,
+      domain: "reddit.com",
+      thumb
+    };
+  }).filter(p => p.id && p.title);
+}
+async function fromRedditRss(sub){
+  const waits = [0, 1400, 3600, 7000];
+  const url = `https://www.reddit.com/r/${sub}/new/.rss?limit=50`;
+  let last;
+  for(const waitMs of waits){
+    if(waitMs) await sleep(waitMs);
+    const routes = proxyRoutes();
+    routes.sort((a, b) => (b[0] === state.route) - (a[0] === state.route));
+    for(const [name, build] of routes){
+      const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 9000);
+      try{
+        const r = await fetch(build(url), {signal: ctl.signal});
+        if(r.status === 429) throw new Error("HTTP 429");
+        if(!r.ok) throw new Error("HTTP " + r.status);
+        const text = await r.text();
+        if(!/<feed[\s>]/i.test(text)) throw new Error("bad rss");
+        state.route = name;
+        const posts = parseAtomListing(text, sub);
+        if(posts.length) return posts;
+      }catch(e){ last = e; }
+      finally{ clearTimeout(t); }
+    }
+  }
+  throw last || new Error("rss failed");
+}
 /* 2) live from Reddit, directly or through public relays (backup) */
 async function fromReddit(sub){
-  const j = await getJSON(REDDIT(sub));
-  return parseListing(j, sub);
+  try{
+    const j = await getJSON(REDDIT(sub));
+    return parseListing(j, sub);
+  }catch(e){
+    return fromRedditRss(sub);
+  }
 }
 async function fromRedditCombined(){
   const j = await getJSON(REDDIT_MULTI);
