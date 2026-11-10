@@ -39,7 +39,7 @@ jobs:
 
           function fromJson(j, sub) {
             return j.data.children.map(c => c.data).filter(d => !d.stickied).map(d => ({
-              id: d.id, sub, title: d.title, flair: d.link_flair_text || null, score: d.score,
+              id: d.id, sub: sub || d.subreddit, title: d.title, flair: d.link_flair_text || null, score: d.score,
               comments: d.num_comments, created: d.created_utc, author: d.author,
               permalink: "https://www.reddit.com" + d.permalink,
               link: d.is_self ? null : d.url, domain: d.domain,
@@ -83,16 +83,40 @@ jobs:
             throw last || new Error("no posts");
           }
 
+          async function fetchCombined() {
+            const multi = SUBS.join("+");
+            const tries = [
+              async () => fromJson(await (await get(`https://www.reddit.com/r/${multi}/new.json?limit=150&raw_json=1`)).json(), null),
+              async () => fromJson(await (await get(`https://old.reddit.com/r/${multi}/new.json?limit=150&raw_json=1`)).json(), null)
+            ];
+            let last;
+            for (const t of tries) {
+              try {
+                const p = await t();
+                if (p.length) return p.filter(x => SUBS.includes(x.sub));
+              } catch (e) {
+                last = e;
+              }
+            }
+            throw last || new Error("no combined posts");
+          }
+
           (async () => {
             let all = [];
-            for (const sub of SUBS) {
-              try {
-                const p = await fetchSub(sub);
-                console.log(`r/${sub}: ${p.length} posts`);
-                all.push(...p);
-              } catch (e) {
-                console.log(`r/${sub}: failed (${e.message}), keeping previous posts`);
-                all.push(...old.posts.filter(p => p.sub === sub));
+            try {
+              all = await fetchCombined();
+              console.log(`combined fetch: ${all.length} posts`);
+            } catch (e) {
+              console.log(`combined fetch failed (${e.message}), trying per-subreddit fallback`);
+              for (const sub of SUBS) {
+                try {
+                  const p = await fetchSub(sub);
+                  console.log(`r/${sub}: ${p.length} posts`);
+                  all.push(...p);
+                } catch (e) {
+                  console.log(`r/${sub}: failed (${e.message}), keeping previous posts`);
+                  all.push(...old.posts.filter(p => p.sub === sub));
+                }
               }
             }
             all.sort((a, b) => b.created - a.created);
