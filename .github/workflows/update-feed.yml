@@ -101,11 +101,37 @@ jobs:
             throw last || new Error("no combined posts");
           }
 
+          function missingSubs(posts) {
+            const have = new Set(posts.map(p => p.sub));
+            return SUBS.filter(s => !have.has(s));
+          }
+
+          function mergeUnique(posts) {
+            const m = new Map();
+            for (const p of posts) {
+              if (!p || !p.id || !p.sub) continue;
+              m.set(`${p.sub}:${p.id}`, p);
+            }
+            return [...m.values()];
+          }
+
           (async () => {
             let all = [];
             try {
               all = await fetchCombined();
               console.log(`combined fetch: ${all.length} posts`);
+
+              const missing = missingSubs(all);
+              for (const sub of missing) {
+                try {
+                  const p = await fetchSub(sub);
+                  console.log(`top-up r/${sub}: ${p.length} posts`);
+                  all.push(...p);
+                } catch (e) {
+                  console.log(`top-up r/${sub} failed (${e.message}), keeping previous posts`);
+                  all.push(...old.posts.filter(p => p.sub === sub));
+                }
+              }
             } catch (e) {
               console.log(`combined fetch failed (${e.message}), trying per-subreddit fallback`);
               for (const sub of SUBS) {
@@ -119,6 +145,7 @@ jobs:
                 }
               }
             }
+            all = mergeUnique(all);
             all.sort((a, b) => b.created - a.created);
             if (JSON.stringify(all) === JSON.stringify(old.posts)) { console.log("No changes"); return; }
             fs.writeFileSync("posts.json", JSON.stringify({ updated: Date.now(), posts: all }));

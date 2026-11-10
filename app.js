@@ -2,7 +2,7 @@
 const COLORS = {VitaPiracy:"var(--c2)", vitahacks:"var(--c3)", PSVitaHomebrew:"var(--c1)"};
 const TOPICS = {
   Port:      /\b(port|ported|porting)\b/i,
-  Homebrew:  /\b(homebrew|vpk|vitashell|henkaku|enso|ensĹŤ|taihen)\b/i,
+  Homebrew:  /\b(homebrew|vpk|vitashell|henkaku|enso|taihen)\b/i,
   Game:      /\b(game|games|rom|remake|demo|release)\b/i,
   App:       /\b(app|apps|tool|plugin|emulator|launcher|manager|update|v\d+(\.\d+)+)\b/i,
 };
@@ -110,10 +110,22 @@ async function fromRedditCombined(){
 function sleep(ms){
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+function missingSubs(posts){
+  const have = new Set((posts || []).map(p => p.sub));
+  return SUBS.filter(s => !have.has(s));
+}
+function mergePosts(a, b){
+  const out = new Map();
+  [...(a || []), ...(b || [])].forEach(p => {
+    if(!p || !p.id || !p.sub) return;
+    out.set(`${p.sub}:${p.id}`, p);
+  });
+  return [...out.values()].sort((x, y) => y.created - x.created);
+}
 
 async function load(){
   $("status").className = "status";
-  $("status").textContent = "Loadingâ€¦";
+  $("status").textContent = "Loading...";
   let posts = [], src = "";
   try{
     const f = await fromFile();
@@ -124,6 +136,23 @@ async function load(){
       if(mins > 150) posts = [];            // stale, try live below
     }
   }catch(e){}
+
+  if(posts.length){
+    const startMissing = missingSubs(posts);
+    if(startMissing.length){
+      let merged = posts;
+      try{ merged = mergePosts(merged, await fromRedditCombined()); }
+      catch(e){}
+      for(const sub of missingSubs(merged)){
+        try{ merged = mergePosts(merged, await fromReddit(sub)); }
+        catch(e){}
+        await sleep(350);
+      }
+      posts = merged;
+      if(!missingSubs(posts).length) src += " + live top-up";
+    }
+  }
+
   if(!posts.length){
     try{
       posts = await fromRedditCombined();
@@ -146,10 +175,15 @@ async function load(){
       if(c){ state.posts = c.posts; state.src = "saved copy from " + new Date(c.t).toLocaleString(); }
     }catch(e){}
   }
+
+  const missing = missingSubs(posts);
   render(); updateDevice();
   if(!posts.length){
     $("status").className = "status err";
     $("status").textContent = "Couldn't reach Reddit right now. Press Refresh in a minute.";
+  } else if(missing.length){
+    $("status").className = "status err";
+    $("status").textContent = `${state.last ? state.last.length : posts.length} posts - ${state.src || ""} - missing: ${missing.join(", ")}`;
   }
 }
 
@@ -207,7 +241,7 @@ function render(){
     root.appendChild(a);
   }
   if(!$("status").classList.contains("err"))
-    $("status").textContent = `${list.length} posts Â· ${state.src || ""}`;
+    $("status").textContent = `${list.length} posts - ${state.src || ""}`;
 }
 
 $("q").oninput = render;
