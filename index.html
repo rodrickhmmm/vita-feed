@@ -3,19 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vita Feed â€“ new apps, ports & games</title>
+<title>Vita Feed</title>
 <script src="theme-init.js"></script>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <nav class="gnav" aria-label="Site">
   <div class="in">
-    <a class="brand" href="#feed">VITA FEED<small>news, ports, games</small></a>
-    <a class="nl" href="https://www.reddit.com/r/PSVitaHomebrew/" target="_blank" rel="noopener noreferrer">PSVitaHomebrew</a>
-    <a class="nl" href="https://www.reddit.com/r/vitahacks/" target="_blank" rel="noopener noreferrer">vitahacks</a>
-    <a class="nl" href="https://www.reddit.com/r/VitaPiracy/" target="_blank" rel="noopener noreferrer">VitaPiracy</a>
+    <a class="brand" href="#feed">VITA FEED</a>
     <span class="sp"></span>
-    <button class="tbtn" id="dlBtn" type="button" title="Download what you are viewing as a CSV file">&darr; Download</button>
     <button class="sw" id="themeBtn" type="button" role="switch" aria-checked="false" aria-label="Dark mode"><span class="ico">&#9728;</span><span class="ico">&#9790;</span><i></i></button>
     <input type="search" id="gq" placeholder="Search" aria-label="Search the current view">
   </div>
@@ -81,7 +77,7 @@
         <g fill="#04060a"><circle cx="782" cy="322" r="2.2"/><circle cx="790" cy="322" r="2.2"/><circle cx="798" cy="322" r="2.2"/><circle cx="782" cy="330" r="2.2"/><circle cx="790" cy="330" r="2.2"/><circle cx="798" cy="330" r="2.2"/></g>
         <rect x="396" y="393" width="48" height="6" rx="3" fill="#04060a"/>
       </svg>
-      <div class="screen" id="devScreen"><b>LATEST</b><div>Loading postsâ€¦</div></div>
+      <div class="screen" id="devScreen"><b>LATEST</b><div>Loading posts...</div></div>
     </div>
   </div>
 </section>
@@ -106,11 +102,6 @@
   <span class="sep"></span>
   <button class="chip" id="refresh" type="button">Refresh</button>
 </div>
-<details class="fset" id="fset">
-  <summary>Feed connection</summary>
-  <p>If posts fail to load, run <code>python3 server.py</code> in this file's folder and open <code>http://localhost:8000/vita-feed.html</code>. Or paste your own relay address here (for example a Cloudflare Worker from <code>worker.js</code>). Use <code>{url}</code> where the Reddit address goes, or end the address so it can be appended.</p>
-  <div class="tbar"><input type="search" id="proxyIn" placeholder="https://your-relay.workers.dev/?url=" aria-label="Relay address"><button class="chip" id="proxySave" type="button">Save and reload</button></div>
-</details>
 <div class="status" id="status" role="status" aria-live="polite"></div>
 <main id="list"></main>
 </div>
