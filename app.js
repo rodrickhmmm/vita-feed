@@ -1,4 +1,4 @@
-﻿const SUBS = ["VitaPiracy","vitahacks","PSVitaHomebrew"];
+const SUBS = ["VitaPiracy","vitahacks","PSVitaHomebrew"];
 const COLORS = {VitaPiracy:"var(--c2)", vitahacks:"var(--c3)", PSVitaHomebrew:"var(--c1)"};
 const TOPICS = {
   Port:      /\b(port|ported|porting)\b/i,
@@ -52,13 +52,13 @@ function proxyRoutes(){
 }
 async function getJSON(url){
   const routes = proxyRoutes();
-  const waits = [0, 1400, 3600, 7000];
+  const waits = [0, 2000];
   let last;
   routes.sort((a, b) => (b[0] === state.route) - (a[0] === state.route));
   for(const waitMs of waits){
     if(waitMs) await sleep(waitMs);
     for(const [name, build] of routes){
-      const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 9000);
+      const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 7000);
       try{
         const r = await fetch(build(url), {signal: ctl.signal});
         if(r.status === 429) throw new Error("HTTP 429");
@@ -136,7 +136,7 @@ function parseAtomListing(xml, sub){
   }).filter(p => p.id && p.title);
 }
 async function fromRedditRss(sub){
-  const waits = [0, 1400, 3600, 7000];
+  const waits = [0, 2000];
   const url = `https://www.reddit.com/r/${sub}/new/.rss?limit=50`;
   let last;
   for(const waitMs of waits){
@@ -144,7 +144,7 @@ async function fromRedditRss(sub){
     const routes = proxyRoutes();
     routes.sort((a, b) => (b[0] === state.route) - (a[0] === state.route));
     for(const [name, build] of routes){
-      const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 9000);
+      const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 7000);
       try{
         const r = await fetch(build(url), {signal: ctl.signal});
         if(r.status === 429) throw new Error("HTTP 429");
@@ -189,68 +189,57 @@ function mergePosts(a, b){
   return [...out.values()].sort((x, y) => y.created - x.created);
 }
 
+let loading = false;
+function agoText(mins){ return mins < 1 ? "just now" : mins < 60 ? mins + " min ago" : mins < 2880 ? Math.round(mins/60) + " h ago" : Math.round(mins/1440) + " d ago"; }
 async function load(){
+  if(loading) return;
+  loading = true;
   $("status").className = "status";
   $("status").textContent = "Loading...";
-  let posts = [], src = "";
+  let mins = null;
+
+  /* 1) show what the GitHub updater saved straight away, even if it is a bit old */
   try{
     const f = await fromFile();
     if(f){
-      posts = f.posts;
-      const mins = Math.max(0, Math.round((Date.now() - f.updated) / 60000));
-      src = "refreshed " + (mins < 60 ? mins + " min" : Math.round(mins/60) + " h") + " ago";
-      if(mins > 150) posts = [];            // stale, try live below
+      state.posts = f.posts;
+      mins = Math.max(0, Math.round((Date.now() - f.updated) / 60000));
+      state.src = "refreshed " + agoText(mins);
     }
   }catch(e){}
-
-  if(posts.length){
-    const startMissing = missingSubs(posts);
-    if(startMissing.length){
-      let merged = posts;
-      try{ merged = mergePosts(merged, await fromRedditCombined()); }
-      catch(e){}
-      for(const sub of missingSubs(merged)){
-        try{ merged = mergePosts(merged, await fromReddit(sub)); }
-        catch(e){}
-        await sleep(350);
-      }
-      posts = merged;
-      if(!missingSubs(posts).length) src += " + live top-up";
-    }
-  }
-
-  if(!posts.length){
-    try{
-      posts = await fromRedditCombined();
-    }catch(e){}
-  }
-  if(!posts.length){
-    for(const sub of SUBS){
-      try{ posts.push(...await fromReddit(sub)); }
-      catch(e){}
-      await sleep(350);
-    }
-    if(posts.length) src = "live from Reddit";
-  }
-  if(posts.length){
-    state.posts = posts; state.src = src;
-    try{ localStorage.setItem("vitafeed", JSON.stringify({t:Date.now(), posts})); }catch(e){}
-  } else {
+  if(!state.posts.length){
     try{
       const c = JSON.parse(localStorage.getItem("vitafeed") || "null");
-      if(c){ state.posts = c.posts; state.src = "saved copy from " + new Date(c.t).toLocaleString(); }
+      if(c && c.posts && c.posts.length){ state.posts = c.posts; state.src = "saved copy from " + new Date(c.t).toLocaleString(); }
     }catch(e){}
   }
+  render();
 
-  const missing = missingSubs(posts);
-  render(); updateDevice();
-  if(!posts.length){
+  /* 2) in the background, top up from Reddit if the file is old or incomplete */
+  const stale = mins === null || mins > 60;
+  if(stale || missingSubs(state.posts).length){
+    if(!state.posts.length) $("status").textContent = "Loading from Reddit...";
+    let got = false;
+    try{ state.posts = mergePosts(state.posts, await fromRedditCombined()); got = true; render(); }catch(e){}
+    for(const sub of SUBS){
+      if(got && !stale && state.posts.some(p => p.sub === sub)) continue;
+      if(got && state.posts.some(p => p.sub === sub && Date.now()/1000 - p.created < 3*3600)) continue;
+      try{ state.posts = mergePosts(state.posts, await fromReddit(sub)); got = true; render(); }catch(e){}
+      await sleep(350);
+    }
+    if(got) state.src = "live from Reddit";
+  }
+
+  if(state.posts.length){
+    try{ localStorage.setItem("vitafeed", JSON.stringify({t:Date.now(), posts:state.posts.slice(0,200)})); }catch(e){}
+    $("status").className = "status";
+    render();
+  } else {
+    render();
     $("status").className = "status err";
     $("status").textContent = "Couldn't reach Reddit right now. Press Refresh in a minute.";
-  } else if(missing.length){
-    $("status").className = "status err";
-    $("status").textContent = `${state.last ? state.last.length : posts.length} posts - ${state.src || ""} - missing: ${missing.join(", ")}`;
   }
+  loading = false;
 }
 
 function render(){
@@ -282,7 +271,7 @@ function render(){
     h.appendChild(l); a.appendChild(h);
     if(p.thumb){
       const im = document.createElement("img");
-      im.className = "thumb"; im.src = p.thumb; im.alt = ""; im.loading = "lazy"; im.referrerPolicy = "no-referrer";
+      im.className = "thumb"; im.src = p.thumb; im.alt = ""; im.loading = "lazy"; im.referrerPolicy = "no-referrer"; im.onerror = () => im.remove();
       a.appendChild(im);
     }
     const m = document.createElement("div");
@@ -446,41 +435,28 @@ function showTab(t){
   const tracker = t === "tracker";
   $("feedView").hidden = tracker;
   $("trackerView").hidden = !tracker;
-  $("tabFeed").setAttribute("aria-pressed", !tracker);
-  $("tabTracker").setAttribute("aria-pressed", tracker);
+  document.querySelectorAll("[data-tab]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.tab === (tracker ? "tracker" : "feed"))));
   if(tracker) loadSheet();
   history.replaceState(null, "", tracker ? "#tracker" : "#feed");
 }
-$("tabFeed").onclick = () => showTab("feed");
-$("tabTracker").onclick = () => showTab("tracker");
+document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => showTab(b.dataset.tab));
 $("sheetDetails").addEventListener("toggle", () => {
   if($("sheetDetails").open && !$("sheetFrame").src) $("sheetFrame").src = SHEET + "&rm=minimal";
 });
 if(location.hash === "#tracker") showTab("tracker");
 
 /* nav search, hero, device screen, keyboard */
-function updateDevice(){
-  const top = [...state.posts].sort((a,b) => b.created-a.created).slice(0,3);
-  if(!top.length) return;
-  const sc = $("devScreen"); sc.textContent = "";
-  const b = document.createElement("b"); b.textContent = "LATEST"; sc.appendChild(b);
-  top.forEach(p => { const d = document.createElement("div"); d.textContent = p.title; sc.appendChild(d); });
-}
-$("gq").oninput = () => {
-  const t = $("trackerView").hidden ? $("q") : $("tq");
-  t.value = $("gq").value; t.dispatchEvent(new Event("input"));
-};
-$("heroBtn").onclick = e => { e.preventDefault(); showTab("feed"); $("panelwrap").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"}); };
+function updateDevice(){}
 function applyTheme(t){
   document.documentElement.dataset.theme = t;
-  $("themeBtn").setAttribute("aria-checked", t === "dark");
+  document.querySelectorAll("[data-themeswitch]").forEach(b => b.setAttribute("aria-checked", String(t === "dark")));
 }
-applyTheme(document.documentElement.dataset.theme || "light");
-$("themeBtn").onclick = () => {
+applyTheme(document.documentElement.dataset.theme || "dark");
+document.querySelectorAll("[data-themeswitch]").forEach(b => b.onclick = () => {
   const t = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
   applyTheme(t);
   try{ localStorage.setItem("vitatheme", t); }catch(e){}
-};
+});
 
 /* CSV download of the current view */
 function toCSV(head, rows){
@@ -493,7 +469,7 @@ function saveFile(name, text){
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
-$("dlBtn").onclick = () => {
+const downloadCSV = () => {
   const day = new Date().toISOString().slice(0,10);
   if($("trackerView").hidden){
     const rows = (state.last || []).map(p => [p.sub, p.title, p.flair||"", p.score, p.comments,
@@ -507,14 +483,11 @@ $("dlBtn").onclick = () => {
     saveFile(`vita-ports-${day}.csv`, toCSV(["Game","Platform","Stage","Status","Notes","Developer page","Gameplay","Verified by","Verified date"], rows));
   }
 };
-try{ $("proxyIn").value = localStorage.getItem("vitaproxy") || ""; }catch(e){}
-$("proxySave").onclick = () => {
-  try{ const v = $("proxyIn").value.trim(); v ? localStorage.setItem("vitaproxy", v) : localStorage.removeItem("vitaproxy"); }catch(e){}
-  state.route = null; load();
-};
+$("dlBtn").onclick = downloadCSV;
+$("dlBtn2").onclick = downloadCSV;
 document.addEventListener("keydown", e => {
   const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName);
-  if(e.key === "/" && !typing){ e.preventDefault(); $("gq").focus(); }
+  if(e.key === "/" && !typing){ e.preventDefault(); ($("trackerView").hidden ? $("q") : $("tq")).focus(); }
   if(typing || e.ctrlKey || e.metaKey || e.altKey) return;
   if(e.key === "ArrowRight") showTab("tracker");
   if(e.key === "ArrowLeft") showTab("feed");
