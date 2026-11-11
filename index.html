@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -8,128 +8,80 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<nav class="gnav" aria-label="Site">
-  <div class="in">
-    <a class="brand" href="#feed">VITA FEED</a>
-    <span class="sp"></span>
-    <button class="sw" id="themeBtn" type="button" role="switch" aria-checked="false" aria-label="Dark mode"><span class="ico">&#9728;</span><span class="ico">&#9790;</span><i></i></button>
+<header class="site-header">
+  <a class="wordmark" href="#feed">VITA FEED</a>
+  <div class="header-actions">
+    <button class="sw" id="themeBtn" type="button" role="switch" aria-checked="false" aria-label="Toggle dark mode"><span class="ico">&#9728;</span><span class="ico">&#9790;</span><i></i></button>
     <input type="search" id="gq" placeholder="Search" aria-label="Search the current view">
   </div>
-</nav>
-<section class="hero">
-  <div class="in">
-    <div>
-      <h1>Every new Vita app, port and game.</h1>
-      <p>All the latest posts from three subreddits and the ports tracker, folded into one place.</p>
-      <a class="btn" id="heroBtn" href="#feed"><span>BROWSE LATEST</span><span>&rsaquo;</span></a>
-    </div>
-    <div class="dev" aria-hidden="true">
-      <svg viewBox="0 0 840 410" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="vbody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#454c56"/><stop offset=".12" stop-color="#20252b"/><stop offset=".55" stop-color="#12151a"/><stop offset="1" stop-color="#07090c"/></linearGradient>
-          <radialGradient id="vcap" cx=".38" cy=".3" r=".8"><stop offset="0" stop-color="#6a737f"/><stop offset=".55" stop-color="#242a31"/><stop offset="1" stop-color="#0d1014"/></radialGradient>
-          <linearGradient id="vsheen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
-          <linearGradient id="vchrome" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#aeb7c2"/></linearGradient>
-        </defs>
-        <!-- body -->
-        <path d="M95 14 C42 14 10 52 10 112 L10 300 C10 360 46 398 102 398 L738 398 C794 398 830 360 830 300 L830 112 C830 52 798 14 745 14 Z" fill="url(#vbody)" stroke="#6f7985" stroke-width="2.5"/>
-        <rect x="22" y="26" width="796" height="358" rx="70" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="2"/>
-        <path d="M70 22 H770 C790 22 802 34 802 50 C560 72 280 72 38 50 C38 34 50 22 70 22 Z" fill="url(#vsheen)"/>
-        <!-- silver trim -->
-        <path d="M690 15 C760 11 806 30 826 84" fill="none" stroke="url(#vchrome)" stroke-width="5" stroke-linecap="round"/>
-        <path d="M14 322 C22 372 56 396 108 398" fill="none" stroke="url(#vchrome)" stroke-width="5" stroke-linecap="round"/>
-        <!-- bezel -->
-        <rect x="156" y="50" width="528" height="310" rx="12" fill="#04060a" stroke="#38404a" stroke-width="2"/>
-        <!-- SONY + camera -->
-        <text x="170" y="39" font-family="Georgia,'Times New Roman',serif" font-weight="700" font-size="17" letter-spacing="3.5" fill="#d5dbe3">SONY</text>
-        <circle cx="300" cy="32" r="5" fill="#0a1a2e" stroke="#3b4450"/>
-        <circle cx="322" cy="32" r="2.5" fill="#1b2128"/>
-        <!-- PS VITA mark -->
-        <text x="420" y="386" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-style="italic" font-size="19" letter-spacing="1.5" fill="#e4e9ef"><tspan font-weight="800">PS</tspan><tspan font-weight="600" dx="4">VITA</tspan></text>
-        <!-- d-pad -->
-        <rect x="76" y="84" width="28" height="68" rx="8" fill="url(#vcap)" stroke="#505a66"/>
-        <rect x="56" y="104" width="68" height="28" rx="8" fill="url(#vcap)" stroke="#505a66"/>
-        <g fill="#0b0d10"><path d="M90 91 L84 100 L96 100 Z"/><path d="M90 145 L84 136 L96 136 Z"/><path d="M63 118 L72 112 L72 124 Z"/><path d="M117 118 L108 112 L108 124 Z"/></g>
-        <!-- left stick -->
-        <circle cx="90" cy="255" r="40" fill="#07090c" stroke="#424b56" stroke-width="2"/>
-        <circle cx="90" cy="255" r="31" fill="url(#vcap)" stroke="#626c78"/>
-        <circle cx="90" cy="255" r="22" fill="none" stroke="#2d343c" stroke-width="2"/>
-        <circle cx="90" cy="255" r="11" fill="none" stroke="#2d343c" stroke-width="2"/>
-        <!-- PS button + speaker -->
-        <ellipse cx="86" cy="347" rx="14" ry="8" fill="#20262c" stroke="#59636f"/>
-        <g fill="#04060a"><circle cx="40" cy="322" r="2.2"/><circle cx="48" cy="322" r="2.2"/><circle cx="56" cy="322" r="2.2"/><circle cx="40" cy="330" r="2.2"/><circle cx="48" cy="330" r="2.2"/><circle cx="56" cy="330" r="2.2"/></g>
-        <!-- face buttons -->
-        <g stroke="#59636f" fill="url(#vcap)"><circle cx="750" cy="86" r="16"/><circle cx="781" cy="117" r="16"/><circle cx="750" cy="148" r="16"/><circle cx="719" cy="117" r="16"/></g>
-        <g fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M750 78 L757 90 L743 90 Z" stroke="#59d99a"/>
-          <circle cx="781" cy="117" r="6" stroke="#ff7b7b"/>
-          <path d="M744 142 L756 154 M756 142 L744 154" stroke="#78b0ff"/>
-          <rect x="714" y="112" width="10" height="10" stroke="#eb97d6"/>
-        </g>
-        <!-- right stick -->
-        <circle cx="750" cy="257" r="40" fill="#07090c" stroke="#424b56" stroke-width="2"/>
-        <circle cx="750" cy="257" r="31" fill="url(#vcap)" stroke="#626c78"/>
-        <circle cx="750" cy="257" r="22" fill="none" stroke="#2d343c" stroke-width="2"/>
-        <circle cx="750" cy="257" r="11" fill="none" stroke="#2d343c" stroke-width="2"/>
-        <!-- start / select + speaker + port -->
-        <rect x="696" y="341" width="28" height="11" rx="5.5" fill="#20262c" stroke="#59636f" transform="rotate(-20 710 346)"/>
-        <rect x="738" y="341" width="28" height="11" rx="5.5" fill="#20262c" stroke="#59636f" transform="rotate(-20 752 346)"/>
-        <g fill="#04060a"><circle cx="782" cy="322" r="2.2"/><circle cx="790" cy="322" r="2.2"/><circle cx="798" cy="322" r="2.2"/><circle cx="782" cy="330" r="2.2"/><circle cx="790" cy="330" r="2.2"/><circle cx="798" cy="330" r="2.2"/></g>
-        <rect x="396" y="393" width="48" height="6" rx="3" fill="#04060a"/>
-      </svg>
-      <div class="screen" id="devScreen"><b>LATEST</b><div>Loading posts...</div></div>
+</header>
+
+<section class="hero" aria-label="Vita Feed overview">
+  <div class="device">
+    <img class="vita-image" src="vita-console.png" alt="PlayStation Vita">
+    <svg viewBox="0 0 840 410" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <linearGradient id="vbody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#454c56"/><stop offset=".12" stop-color="#20252b"/><stop offset=".55" stop-color="#12151a"/><stop offset="1" stop-color="#07090c"/></linearGradient>
+        <radialGradient id="vcap" cx=".38" cy=".3" r=".8"><stop offset="0" stop-color="#6a737f"/><stop offset=".55" stop-color="#242a31"/><stop offset="1" stop-color="#0d1014"/></radialGradient>
+        <linearGradient id="vsheen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+        <linearGradient id="vchrome" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#aeb7c2"/></linearGradient>
+      </defs>
+      <path d="M95 14 C42 14 10 52 10 112 L10 300 C10 360 46 398 102 398 L738 398 C794 398 830 360 830 300 L830 112 C830 52 798 14 745 14 Z" fill="url(#vbody)" stroke="#6f7985" stroke-width="2.5"/>
+      <rect x="22" y="26" width="796" height="358" rx="70" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="2"/>
+      <path d="M70 22 H770 C790 22 802 34 802 50 C560 72 280 72 38 50 C38 34 50 22 70 22 Z" fill="url(#vsheen)"/>
+      <path d="M690 15 C760 11 806 30 826 84" fill="none" stroke="url(#vchrome)" stroke-width="5" stroke-linecap="round"/>
+      <path d="M14 322 C22 372 56 396 108 398" fill="none" stroke="url(#vchrome)" stroke-width="5" stroke-linecap="round"/>
+      <rect x="156" y="50" width="528" height="310" rx="12" fill="#04060a" stroke="#38404a" stroke-width="2"/>
+      <text x="170" y="39" font-family="Georgia,'Times New Roman',serif" font-weight="700" font-size="17" letter-spacing="3.5" fill="#d5dbe3">SONY</text>
+      <circle cx="300" cy="32" r="5" fill="#0a1a2e" stroke="#3b4450"/><circle cx="322" cy="32" r="2.5" fill="#1b2128"/>
+      <text x="420" y="386" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-style="italic" font-size="19" letter-spacing="1.5" fill="#e4e9ef"><tspan font-weight="800">PS</tspan><tspan font-weight="600" dx="4">VITA</tspan></text>
+      <rect x="76" y="84" width="28" height="68" rx="8" fill="url(#vcap)" stroke="#505a66"/><rect x="56" y="104" width="68" height="28" rx="8" fill="url(#vcap)" stroke="#505a66"/>
+      <g fill="#0b0d10"><path d="M90 91 L84 100 L96 100 Z"/><path d="M90 145 L84 136 L96 136 Z"/><path d="M63 118 L72 112 L72 124 Z"/><path d="M117 118 L108 112 L108 124 Z"/></g>
+      <circle cx="90" cy="255" r="40" fill="#07090c" stroke="#424b56" stroke-width="2"/><circle cx="90" cy="255" r="31" fill="url(#vcap)" stroke="#626c78"/><circle cx="90" cy="255" r="22" fill="none" stroke="#2d343c" stroke-width="2"/>
+      <ellipse cx="86" cy="347" rx="14" ry="8" fill="#20262c" stroke="#59636f"/><g fill="#04060a"><circle cx="40" cy="322" r="2.2"/><circle cx="48" cy="322" r="2.2"/><circle cx="56" cy="322" r="2.2"/><circle cx="40" cy="330" r="2.2"/><circle cx="48" cy="330" r="2.2"/><circle cx="56" cy="330" r="2.2"/></g>
+      <g stroke="#59636f" fill="url(#vcap)"><circle cx="750" cy="86" r="16"/><circle cx="781" cy="117" r="16"/><circle cx="750" cy="148" r="16"/><circle cx="719" cy="117" r="16"/></g>
+      <g fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M750 78 L757 90 L743 90 Z" stroke="#59d99a"/><circle cx="781" cy="117" r="6" stroke="#ff7b7b"/><path d="M744 142 L756 154 M756 142 L744 154" stroke="#78b0ff"/><rect x="714" y="112" width="10" height="10" stroke="#eb97d6"/></g>
+      <circle cx="750" cy="257" r="40" fill="#07090c" stroke="#424b56" stroke-width="2"/><circle cx="750" cy="257" r="31" fill="url(#vcap)" stroke="#626c78"/><circle cx="750" cy="257" r="22" fill="none" stroke="#2d343c" stroke-width="2"/>
+      <rect x="696" y="341" width="28" height="11" rx="5.5" fill="#20262c" stroke="#59636f" transform="rotate(-20 710 346)"/><rect x="738" y="341" width="28" height="11" rx="5.5" fill="#20262c" stroke="#59636f" transform="rotate(-20 752 346)"/>
+      <g fill="#04060a"><circle cx="782" cy="322" r="2.2"/><circle cx="790" cy="322" r="2.2"/><circle cx="798" cy="322" r="2.2"/><circle cx="782" cy="330" r="2.2"/><circle cx="790" cy="330" r="2.2"/><circle cx="798" cy="330" r="2.2"/></g>
+      <rect x="396" y="393" width="48" height="6" rx="3" fill="#04060a"/>
+    </svg>
+    <div class="screen" id="devScreen">
+      <strong>VITA FEED</strong>
+      <div class="screen-grid"><span>Theme</span><span>Browse select</span></div>
+      <div class="screen-grid"><button type="button" onclick="document.getElementById('tabFeed').click()">REDDIT FEED</button><button type="button" onclick="document.getElementById('tabTracker').click()">PORTS TRACKER</button></div>
     </div>
   </div>
 </section>
 
 <div class="wrap" id="panelwrap">
-<div class="tabs" role="group" aria-label="Views">
-  <button id="tabFeed" type="button" aria-pressed="true">Reddit feed</button>
-  <button id="tabTracker" type="button" aria-pressed="false">Ports tracker</button>
-</div>
-<div class="panel" id="panel">
-<div id="feedView">
-<div class="bar" id="subs" role="group" aria-label="Subreddits"></div>
-<div class="bar" id="tags" role="group" aria-label="Topic filters"></div>
-<div class="bar">
-  <input type="search" id="q" placeholder="Search titles" aria-label="Search titles">
-  <select id="sort" aria-label="Sort order">
-    <option value="new">Newest first</option>
-    <option value="score">Top score</option>
-    <option value="comments">Most comments</option>
-  </select>
-  <label><input type="checkbox" id="onlyNews"> Only app / port / game posts</label>
-  <span class="sep"></span>
-  <button class="chip" id="refresh" type="button">Refresh</button>
-</div>
-<div class="status" id="status" role="status" aria-live="polite"></div>
-<main id="list"></main>
-</div>
-<section id="trackerView" hidden>
-  <p>Search the PS Vita Ports Tracker [Official] live from Google Sheets. Results show game, platform, status, notes and developer pages. Download links stay in the sheet itself: use "Open row in sheet".</p>
-  <div class="tbar">
-    <input type="search" id="tq" placeholder="Search games, platforms, notes, verifier" aria-label="Search the ports tracker">
-    <select id="tplat" aria-label="Original platform"><option value="">All platforms</option></select>
-    <select id="tstage" aria-label="Development stage"><option value="">All stages</option></select>
-    <select id="tplay" aria-label="Playability status"><option value="">All statuses</option></select>
-    <select id="tsort" aria-label="Sort order">
-      <option value="sheet">Sheet order</option>
-      <option value="name">Name Aâ€“Z</option>
-      <option value="date">Recently verified</option>
-    </select>
+  <div class="tabs" role="group" aria-label="Views">
+    <button id="tabFeed" type="button" aria-pressed="true"><span>Reddit feed</span><small>Latest community posts</small></button>
+    <button id="tabTracker" type="button" aria-pressed="false"><span>Ports tracker</span><small>Browse Vita ports</small></button>
   </div>
-  <div id="tcount" role="status" aria-live="polite">Loading the trackerâ€¦</div>
-  <div id="tlist"></div>
-  <button class="chip" id="tmore" type="button" hidden>Show more</button>
-  <details id="sheetDetails">
-    <summary>Show the full sheet</summary>
-    <p>If it doesn't load below, <a id="sheetLink" target="_blank" rel="noopener noreferrer">open it in a new tab</a>.</p>
-    <iframe id="sheetFrame" title="PS Vita Ports Tracker" loading="lazy"></iframe>
-  </details>
-</section>
+  <div class="panel" id="panel">
+    <div id="feedView">
+      <div class="bar" id="subs" role="group" aria-label="Subreddits"></div>
+      <div class="bar" id="tags" role="group" aria-label="Topic filters"></div>
+      <div class="bar controls">
+        <input type="search" id="q" placeholder="Search titles" aria-label="Search titles">
+        <select id="sort" aria-label="Sort order"><option value="new">Newest first</option><option value="score">Top score</option><option value="comments">Most comments</option></select>
+        <label><input type="checkbox" id="onlyNews"> Only app / port / game posts</label>
+        <span class="sep"></span><button class="chip" id="refresh" type="button">Refresh</button>
+      </div>
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+      <main id="list"></main>
+    </div>
+    <section id="trackerView" hidden>
+      <p>Search the PS Vita Ports Tracker [Official] live from Google Sheets. Results show game, platform, status, notes and developer pages.</p>
+      <div class="tbar"><input type="search" id="tq" placeholder="Search games, platforms, notes, verifier" aria-label="Search the ports tracker"><select id="tplat" aria-label="Original platform"><option value="">All platforms</option></select><select id="tstage" aria-label="Development stage"><option value="">All stages</option></select><select id="tplay" aria-label="Playability status"><option value="">All statuses</option></select><select id="tsort" aria-label="Sort order"><option value="sheet">Sheet order</option><option value="name">Name A–Z</option><option value="date">Recently verified</option></select></div>
+      <div id="tcount" role="status" aria-live="polite">Loading the tracker…</div><div id="tlist"></div><button class="chip" id="tmore" type="button" hidden>Show more</button>
+      <details id="sheetDetails"><summary>Show the full sheet</summary><p>If it doesn't load below, <a id="sheetLink" target="_blank" rel="noopener noreferrer">open it in a new tab</a>.</p><iframe id="sheetFrame" title="PS Vita Ports Tracker" loading="lazy"></iframe></details>
+    </section>
+  </div>
 </div>
-</div>
-
+<a id="heroBtn" href="#feed" hidden>Browse latest</a>
+<input id="proxyIn" type="hidden"><button id="proxySave" type="button" hidden></button><button id="dlBtn" type="button" hidden></button>
 <script src="app.js"></script>
 </body>
 </html>

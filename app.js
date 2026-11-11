@@ -462,9 +462,17 @@ if(location.hash === "#tracker") showTab("tracker");
 function updateDevice(){
   const top = [...state.posts].sort((a,b) => b.created-a.created).slice(0,3);
   if(!top.length) return;
-  const sc = $("devScreen"); sc.textContent = "";
-  const b = document.createElement("b"); b.textContent = "LATEST"; sc.appendChild(b);
-  top.forEach(p => { const d = document.createElement("div"); d.textContent = p.title; sc.appendChild(d); });
+  const sc = $("devScreen"); sc.querySelectorAll(".latest-post").forEach(n => n.remove());
+  const label = document.createElement("span");
+  label.className = "latest-post";
+  label.textContent = "LATEST";
+  sc.appendChild(label);
+  top.forEach(p => {
+    const d = document.createElement("div");
+    d.className = "latest-post";
+    d.textContent = p.title;
+    sc.appendChild(d);
+  });
 }
 $("gq").oninput = () => {
   const t = $("trackerView").hidden ? $("q") : $("tq");
