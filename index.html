@@ -8,14 +8,6 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header class="site-header">
-  <a class="wordmark" href="#feed">VITA FEED</a>
-  <div class="header-actions">
-    <button class="sw" id="themeBtn" type="button" role="switch" aria-checked="false" aria-label="Toggle dark mode"><span class="ico">&#9728;</span><span class="ico">&#9790;</span><i></i></button>
-    <input type="search" id="gq" placeholder="Search" aria-label="Search the current view">
-  </div>
-</header>
-
 <section class="hero" aria-label="Vita Feed overview">
   <div class="device">
     <img class="vita-image" src="vita-console.png" alt="PlayStation Vita">
@@ -48,7 +40,7 @@
     </svg>
     <div class="screen" id="devScreen">
       <strong>VITA FEED</strong>
-      <div class="screen-grid"><span>Theme</span><span>Browse select</span></div>
+      <div class="screen-grid"><button class="screen-theme sw" id="themeBtn" type="button" role="switch" aria-checked="false" aria-label="Toggle dark mode"><span class="ico">&#9728;</span><span class="ico">&#9790;</span><i></i></button><span>Browse select</span></div>
       <div class="screen-grid"><button type="button" onclick="document.getElementById('tabFeed').click()">REDDIT FEED</button><button type="button" onclick="document.getElementById('tabTracker').click()">PORTS TRACKER</button></div>
     </div>
   </div>
@@ -81,6 +73,7 @@
   </div>
 </div>
 <a id="heroBtn" href="#feed" hidden>Browse latest</a>
+<input type="search" id="gq" hidden aria-label="Search the current view">
 <input id="proxyIn" type="hidden"><button id="proxySave" type="button" hidden></button><button id="dlBtn" type="button" hidden></button>
 <script src="app.js"></script>
 </body>
