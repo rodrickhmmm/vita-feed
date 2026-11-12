@@ -1,4 +1,8 @@
- # Vita-feed
+<p align="center">
+  <a href="https://rodrickhmmm.github.io/vita-feed/">
+    <img src="README/Banner.png" alt="Vita Feed: everything new in the Vita homebrew community, in one place" width="700">
+  </a>
+</p>
 
 Vita-feed is a website that brings the newest developments from the homebrew PS Vita community into one clean, easy-to-browse feed. It pulls posts from r/VitaPiracy, r/vitahacks, and r/PSVitaHomebrew, along with a community-maintained spreadsheet, presenting them in a polished, user-focused interface.
 
