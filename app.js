@@ -483,8 +483,6 @@ const downloadCSV = () => {
     saveFile(`vita-ports-${day}.csv`, toCSV(["Game","Platform","Stage","Status","Notes","Developer page","Gameplay","Verified by","Verified date"], rows));
   }
 };
-$("dlBtn").onclick = downloadCSV;
-$("dlBtn2").onclick = downloadCSV;
 document.addEventListener("keydown", e => {
   const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName);
   if(e.key === "/" && !typing){ e.preventDefault(); ($("trackerView").hidden ? $("q") : $("tq")).focus(); }
