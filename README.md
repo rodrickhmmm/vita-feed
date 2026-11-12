@@ -1,6 +1,6 @@
  # Vita-feed
 
-Vita-feed is a website that brings the newest developments from the homebrew PS Vita community into one clean, easy-to-browse feed. It pulls posts from r/VitaPiracy, r/PSVita, and r/PSVitaHomebrew, along with a community-maintained spreadsheet, presenting them in a polished, user-focused interface.
+Vita-feed is a website that brings the newest developments from the homebrew PS Vita community into one clean, easy-to-browse feed. It pulls posts from r/VitaPiracy, r/vitahacks, and r/PSVitaHomebrew, along with a community-maintained spreadsheet, presenting them in a polished, user-focused interface.
 
 ## Overview
 
