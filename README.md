@@ -78,6 +78,10 @@ To refresh `posts.json` yourself, run the workflow manually from the **Actions**
 
 Bug reports, ideas and pull requests are welcome. Open an [issue](https://github.com/rodrickhmmm/vita-feed/issues) to start a discussion. Since there's no build step, changes can be tested by serving the folder as shown above.
 
+## License
+
+Code released under the [MIT License](LICENSE). Images and third-party content (Reddit posts, Ports Tracker data) are not covered.
+
 ## Credits
 
 - Posts belong to their authors and to the subreddits they were posted in. Every entry links back to the original Reddit thread.
