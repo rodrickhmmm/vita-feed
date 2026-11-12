@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://rodrickhmmm.github.io/vita-feed/">
-    <img src="README/Banner.png" alt="Vita Feed: everything new in the Vita homebrew community, in one place" width="700">
+    <img src="assets/Banner.png" alt="Vita Feed: everything new in the Vita homebrew community, in one place" width="700">
   </a>
 </p>
 
