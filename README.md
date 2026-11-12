@@ -80,10 +80,11 @@ Bug reports, ideas and pull requests are welcome. Open an [issue](https://github
 
 ## License
 
-Code released under the [MIT License](LICENSE). Images and third-party content (Reddit posts, Ports Tracker data) are not covered.
+Code released under the [MIT License](LICENSE). The console illustration is by Tokyoship under CC BY 3.0 (see Credits). Reddit posts and Ports Tracker data are not covered and belong to their authors.
 
 ## Credits
 
+- Console illustration: "PlayStation Vita illustration" by [Tokyoship](https://commons.wikimedia.org/wiki/File:PlayStation_Vita_illustration.svg), via Wikimedia Commons, licensed under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). Edited for use on this site.
 - Posts belong to their authors and to the subreddits they were posted in. Every entry links back to the original Reddit thread.
 - Ports data comes from the community-maintained PS Vita Ports Tracker spreadsheet.
 - This project is not affiliated with or endorsed by Sony, Reddit or the Vita homebrew projects it links to.
