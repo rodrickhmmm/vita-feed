@@ -219,97 +219,45 @@ a.getbtn{display:inline-block;margin:7px 8px 0 0;padding:5px 11px;border-radius:
       o.hay = norm([o.name, o.plat, o.stage, o.play, o.notes, o.by, o.dev].join(" "));
       T.rows.push(o);
     }
-  }
-  function fillFilters() {
-    var pairs = [["tplat", "plat"], ["tstage", "stage"], ["tplay", "play"]], k, j, seen, sel, vals, v, op;
-    for (k = 0; k < pairs.length; k++) {
-      sel = $(pairs[k][0]); seen = {}; vals = [];
-      for (j = 0; j < T.rows.length; j++) { v = T.rows[j][pairs[k][1]]; if (v && !seen[v]) { seen[v] = 1; vals.push(v); } }
-      vals.sort();
-      for (j = 0; j < vals.length; j++) { op = document.createElement("option"); op.value = vals[j]; op.appendChild(document.createTextNode(vals[j])); sel.appendChild(op); }
-    }
-  }
-  function devLink(r) {
-    var m = r.dev.match(urlRe) || [], urls = [], k, u, g;
-    for (k = 0; k < m.length; k++) { u = m[k].replace(/[.,;]+$/, ""); if (!FILE_HOSTS.test(u)) { urls.push(u); } }
-    if (!urls.length) { return null; }
-    u = urls[0];
-    g = u.match(/^https:\/\/(github\.com|gitlab\.com)\/([^\/?#]+)\/([^\/?#]+)\/?$/i);
-    if (g) { return { href: "https://" + g[1] + "/" + g[2] + "/" + g[3] + "/releases", label: "Get port" }; }
-    if (/^https:\/\/(github|gitlab|gitee)\.com\//i.test(u)) { return { href: u, label: /releases/i.test(u) ? "Get port" : "View project" }; }
-    if (/itch\.io/i.test(u)) { return { href: u, label: "Get on itch.io" }; }
-    if (/rinnegatamante\.eu\/vitadb/i.test(u)) { return { href: u, label: "View on VitaDB" }; }
-    if (/gamebrew\.org/i.test(u)) { return { href: u, label: "GameBrew page" }; }
-    return { href: u, label: /reddit\.com/i.test(u) ? "Reddit thread" : "Project page" };
-  }
-  function txt(tag, cls, text) { var e = document.createElement(tag); if (cls) { e.className = cls; } e.appendChild(document.createTextNode(text)); return e; }
-  function renderTracker() {
-    var terms = norm($("tq").value).split(/\s+/), plat = $("tplat").value, stage = $("tstage").value, play = $("tplay").value;
-    var list = [], root = $("tlist"), j, k, r, ok, d, m, dl, pr, n, a;
-    for (j = 0; j < T.rows.length; j++) {
-      r = T.rows[j]; ok = true;
-      for (k = 0; k < terms.length; k++) { if (terms[k] && r.hay.indexOf(terms[k]) === -1) { ok = false; } }
-      if (ok && (!plat || r.plat === plat) && (!stage || r.stage === stage) && (!play || r.play === play)) { list.push(r); }
-    }
-    root.innerHTML = "";
-    $("tcount").innerHTML = list.length + " of " + T.rows.length + " entries";
-    n = Math.min(T.shown, list.length);
-    for (j = 0; j < n; j++) {
-      r = list[j]; d = document.createElement("div"); d.className = "post";
-      d.appendChild(txt("div", "", r.name)); d.firstChild.style.fontWeight = "bold";
-      m = document.createElement("div"); m.className = "meta";
-      if (r.plat) { m.appendChild(txt("span", "tag", r.plat)); }
-      if (r.stage) { m.appendChild(txt("span", "tag " + (/release/i.test(r.stage) ? "ok" : "wip"), r.stage)); }
-      if (r.play) { m.appendChild(txt("span", "tag", r.play)); }
-      if (r.date) { m.appendChild(txt("span", "", "verified " + r.date + (r.by ? " by " + r.by : ""))); }
-      d.appendChild(m);
-      dl = devLink(r);
-      if (dl) { a = txt("a", "getbtn", dl.label); a.href = dl.href; d.appendChild(a); }
-      pr = (r.proof.match(urlRe) || [])[0];
-      if (pr) { a = txt("a", "getbtn", "Gameplay"); a.href = pr; d.appendChild(a); }
-      if (r.notes) { k = r.notes.replace(urlRe, "").replace(/^\s+|\s+$/g, ""); if (k) { d.appendChild(txt("div", "note", k)); } }
-      root.appendChild(d);
-    }
-    $("tmore").style.display = list.length > n ? "inline-block" : "none";
-    $("tmore").innerHTML = "Show more (" + (list.length - n) + " left)";
-  }
-  function loadSheet() {
-    var tag, timer;
-    if (T.loaded || T.loading) { return; }
-    T.loading = true;
-    timer = setTimeout(function () { tfail("The sheet took too long to respond."); }, 15000);
-    window.google = window.google || {}; window.google.visualization = window.google.visualization || {};
-    window.google.visualization.Query = window.google.visualization.Query || {};
-    window.google.visualization.Query.setResponse = function (resp) {
-      clearTimeout(timer); T.loading = false;
-      if (!resp || resp.status !== "ok") { return tfail("Google refused to share the sheet data."); }
-      try { ingest(resp.table); T.loaded = true; fillFilters(); renderTracker(); } catch (e) { tfail("Could not read the sheet's layout."); }
-    };
-    tag = document.createElement("script");
-    tag.onerror = function () { clearTimeout(timer); tfail("Could not reach Google Sheets."); };
-    tag.src = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq?gid=" + SHEET_GID + "&headers=1&tqx=out:json";
-    document.getElementsByTagName("head")[0].appendChild(tag);
-  }
-  function showTab(track) {
-    $("feedView").style.display = track ? "none" : "block";
-    $("trackView").style.display = track ? "block" : "none";
-    $("tabFeed").className = "tabbtn" + (track ? "" : " on");
-    $("tabTrack").className = "tabbtn" + (track ? " on" : "");
-    if (track) { loadSheet(); }
-  }
-  $("tabFeed").onclick = function () { showTab(false); };
-  $("tabTrack").onclick = function () { showTab(true); };
-  var tt;
-  $("tq").onkeyup = function () { clearTimeout(tt); tt = setTimeout(function () { T.shown = 30; renderTracker(); }, 200); };
-  $("tplat").onchange = $("tstage").onchange = $("tplay").onchange = function () { T.shown = 30; renderTracker(); };
-  $("tmore").onclick = function () { T.shown += 30; renderTracker(); };
-
-  function fit() {
-    var w = $("screen").offsetWidth;
-    var tb = $("tabs").getElementsByTagName("button"), k;
-    if (w) {
-      $("title").style.fontSize = Math.round(w * 0.088) + "px";
-      for (k = 0; k < tb.length; k++) { tb[k].style.fontSize = Math.round(w * 0.045) + "px"; tb[k].style.padding = Math.round(w * 0.022) + "px " + Math.round(w * 0.03) + "px"; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vita Feed (PS Vita edition)</title>
+<style>
+html{background:#0a111b}
+body{margin:0;background:#0a111b;color:#f4f6fb;font:17px/1.35 "Lexend","Segoe UI",system-ui,Arial,sans-serif}
+a{color:#7cc8ff}
+.top{position:relative;padding:8px 8px 0;background-color:#1a2840;background-image:radial-gradient(#566f91 1px,transparent 1.3px),linear-gradient(#27374f,#1a2840);background-size:12px 12px,100% 100%}
+.device{position:relative;max-width:640px;margin:0 auto}
+.device img{display:block;width:100%;height:auto}
+.screen{position:absolute;left:21.6%;top:8.4%;width:56.6%;height:64.9%;overflow:hidden;background:#2a2d34;background:linear-gradient(145deg,#33363d,#1e2127)}
+.screen h1{position:absolute;left:0;right:0;top:7%;margin:0;padding-left:.13em;text-align:center;font-size:30px;line-height:1;letter-spacing:.13em;font-weight:800;color:#fff}
+.panel{position:relative;max-width:780px;margin:-26px auto 0;padding:14px 14px 30px;background:#3c4553;background:linear-gradient(#3c4553,#2d353f);border:1px solid #1a222c;border-bottom:0;border-radius:20px 20px 0 0;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+.lite{margin:0 0 10px;text-align:center;font-size:14px;color:#b6bfcc}
+#tabs{position:absolute;left:6%;right:6%;top:36%}
+.tabbtn{display:block;width:100%;margin:0 0 6px;padding:8px 10px;-webkit-box-sizing:border-box;box-sizing:border-box;border:0;border-radius:6px;background:#5d6277;color:#fff;font:700 16px/1.15 "Lexend","Segoe UI",system-ui,Arial,sans-serif;letter-spacing:.02em;text-align:left;text-transform:uppercase;cursor:pointer}
+.tabbtn.on{background:#6f7592;box-shadow:inset 0 -4px 0 #849aa9}
+.bar{margin:0 0 6px;padding:0}
+label.only{display:inline-block;margin:0 6px 8px 0;font-size:15px;color:#f4f6fb;cursor:pointer}
+input[type=checkbox]{width:auto;margin:0 7px 0 0;padding:0;vertical-align:middle}
+.chip,button.go{display:inline-block;margin:0 6px 6px 0;padding:6px 11px;border:1px solid #3a475a;border-radius:3px;background:#222c3a;color:#f4f6fb;font:15px "Lexend","Segoe UI",system-ui,Arial,sans-serif;cursor:pointer}
+.chip.on{border-color:#aac2d2;background:#34445a;box-shadow:inset 0 -3px 0 #aac2d2}
+input,select{margin:0 6px 6px 0;padding:6px 9px;border:1px solid #3f4d5f;border-radius:3px;background:#0e1520;color:#f4f6fb;font:15px "Lexend","Segoe UI",system-ui,Arial,sans-serif}
+#q,#tq{width:190px}
+#status,#tcount{margin:8px 0;color:#b6bfcc;font-size:14px}
+.post{margin:0 0 8px;padding:11px 14px;border-radius:4px;background:#5b6075;color:#f6f7fb}
+.post a.t{display:block;color:#f6f7fb;font-weight:600;text-decoration:none}
+.meta{margin-top:5px;font-size:13px;color:#d3d8e4}
+.sub{font-weight:700}
+.tag{display:inline-block;margin:0 6px 0 0;padding:1px 7px;border-radius:3px;background:rgba(255,255,255,.17);color:#f6f7fb;font-size:12px}
+.tag.new{background:#e2a72f;color:#221500;font-weight:700}
+.tag.ok{background:#2d765f;color:#c3f5e2}
+.tag.wip{background:#815f2a;color:#ffe3a8}
+a.getbtn{display:inline-block;margin:7px 8px 0 0;padding:5px 11px;border-radius:3px;background:#2d353f;color:#7cc8ff;font-size:14px;text-decoration:none}
+.note{margin:6px 0 0;font-size:13px;color:#d3d8e4}
+.round(w * 0.03) + "px"; }
     }
   }
   window.onresize = fit;
