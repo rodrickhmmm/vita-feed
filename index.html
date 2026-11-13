@@ -12,6 +12,27 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <script>
+(function () {
+  var isVita = /PlayStation Vita/i.test(navigator.userAgent);
+  if (!(isVita || !window.Promise || !window.fetch) || location.search.indexOf("full") !== -1) { return; }
+  try { if (localStorage.getItem("vitaLiteDismissed")) { return; } } catch (e) {}
+  var who = isVita ? "a PS Vita" : "an older browser";
+  var btn = "display:inline-block;margin:4px 6px;padding:8px 14px;border-radius:6px;font-size:18px;text-decoration:none;";
+  var bar = document.createElement("div");
+  bar.style.cssText = "background:#27374f;color:#fff;padding:12px;font:18px Arial,sans-serif;text-align:center;border-bottom:2px solid #7aa2f7";
+  bar.innerHTML = '<div style="margin-bottom:6px">It seems you are on ' + who + '. Want to open the Lite version instead?</div>' +
+    '<a href="vita.html" style="' + btn + 'background:#3b6fd8;color:#fff">Open Lite version</a>' +
+    '<a href="#" id="vitaLiteNo" style="' + btn + 'background:#1e293b;color:#e5e7eb;border:1px solid #475569">No thanks</a>';
+  document.body.insertBefore(bar, document.body.firstChild);
+  document.getElementById("vitaLiteNo").onclick = function () {
+    try { localStorage.setItem("vitaLiteDismissed", "1"); } catch (e) {}
+    bar.parentNode.removeChild(bar);
+    return false;
+  };
+})();
+</script>
+
 <div class="top">
   <div class="stage">
 
