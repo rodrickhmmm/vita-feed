@@ -32,7 +32,7 @@ Vita Feed collects the latest PS Vita homebrew news in one place. It pulls recen
 **General**
 - Dark and light theme, remembered between visits.
 - Works on mobile.
-- Includes a separate Lite version optimized for the PS Vita browser at [`vita.html`](vita.html). The main page offers it automatically when it detects a PS Vita or an older browser.
+- Includes a separate Lite version optimized for the PS Vita browser at [`vita.html`](https://rodrickhmmm.github.io/vita-feed/vita.html). The main page offers it automatically when it detects a PS Vita or an older browser.
 - Links to a view directly with `#feed` or `#tracker`.
 
 ## How it works
