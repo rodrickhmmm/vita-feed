@@ -101,6 +101,19 @@ a {
   color: var(--link);
 }
 
+.github-footer {
+  padding: 18px 12px 24px;
+  border-top: 1px solid var(--line);
+  background: var(--bg);
+  text-align: center;
+  font-size: 14px;
+}
+
+.github-footer a {
+  color: var(--link);
+  text-decoration: underline;
+}
+
 button,
 input,
 select {
